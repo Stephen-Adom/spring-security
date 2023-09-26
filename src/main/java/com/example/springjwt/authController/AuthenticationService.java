@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.springjwt.config.JwtService;
 import com.example.springjwt.entity.Role;
 import com.example.springjwt.entity.User;
+import com.example.springjwt.exception.AuthException;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,19 +47,31 @@ public class AuthenticationService {
 
         System.out.println(savedUser);
 
-        // String jwtToken = jwtService.generateToken(userClaims, user);
+        String jwtToken = jwtService.generateToken(userClaims, user);
 
-        return AuthenticationResponse.builder().token("jwtToken").build();
+        return AuthenticationResponse.builder().token(jwtToken).build();
     }
 
-    public AuthenticationResponse login(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()));
+    public AuthenticationResponse login(AuthenticationRequest request) throws AuthException {
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()));
+        } catch (Exception e) {
+            throw new AuthException(e.getMessage());
+        }
+
+        System.out.println(
+                "--------------------------------------authentication user------------------------------------------");
+
+        Map<String, Object> userClaims = new HashMap<String, Object>();
+        userClaims.put("iss", "springjwt");
+        userClaims.put("aud", "springjwt");
 
         User user = this.userRepository.findByEmail(request.getEmail());
-        String jwtToken = jwtService.generateToken(null, user);
+        String jwtToken = jwtService.generateToken(userClaims, user);
 
         return AuthenticationResponse.builder().token(jwtToken).build();
     }

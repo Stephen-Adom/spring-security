@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.springjwt.exception.AuthException;
+
 @RestController
 public class AuthenticationController {
 
@@ -19,7 +21,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/api/v1/auth/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request)
+            throws AuthException {
         return ResponseEntity.ok(this.authenticationService.login(request));
     }
 
